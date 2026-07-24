@@ -1,0 +1,49 @@
+# flutter-apk-workflow-template.yml
+#
+# CARA PAKAI:
+# 1. Copy file ini ke repo Flutter kamu (repo yang mau kamu build APK-nya,
+#    BUKAN repo Wanzz Deploy ini), simpan sebagai:
+#      .github/workflows/build-apk.yml
+# 2. Sesuaikan `flutter-version` di bawah kalau perlu.
+# 3. Commit & push ke repo Flutter kamu.
+# 4. Pastikan repo Flutter itu sudah muncul di panel "Pilih Repository"
+#    Wanzz Deploy (butuh GITHUB_TOKEN yang terhubung ke akun yang sama).
+# 5. Pilih repo itu, buka panel "Build APK (Flutter)", klik tombol Build.
+#
+# Wanzz Deploy hanya MEMICU workflow ini lewat GitHub Actions API — proses
+# build sungguhan (install Flutter SDK, compile, dsb) berjalan di server
+# GitHub sendiri, bukan di server Wanzz Deploy.
+#
+# Setelah build selesai (pantau di tab "Actions" repo kamu di GitHub),
+# APK hasil build bisa diunduh dari halaman run tersebut, di bagian
+# "Artifacts" — namanya "app-release-apk".
+
+name: Build APK (Wanzz Deploy)
+
+on:
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout kode
+        uses: actions/checkout@v4
+
+      - name: Setup Flutter
+        uses: subosito/flutter-action@v2
+        with:
+          flutter-version: '3.24.0'
+          channel: 'stable'
+
+      - name: Install dependencies
+        run: flutter pub get
+
+      - name: Build APK (release)
+        run: flutter build apk --release
+
+      - name: Upload APK sebagai artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: app-release-apk
+          path: build/app/outputs/flutter-apk/app-release.apk
